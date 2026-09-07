@@ -1,17 +1,20 @@
 using ClosedXML.Excel;
+using Supabase;
 
 namespace 電池篩選器
 {
     public partial class Form1 : Form
     {
+        private readonly bool _isPaidMember;
         private List<Battery> allBatteries = new List<Battery>();
         private List<BatteryScore> batteryAllScores = new List<BatteryScore>();
         private List<BatteryScore> battery4100Scores = new List<BatteryScore>();
         private List<BatteryScore> battery5600Scores = new List<BatteryScore>();
         private List<BatteryScore> battery8500Scores = new List<BatteryScore>();
 
-        public Form1()
+        public Form1(bool isPaidMember)
         {
+            _isPaidMember = isPaidMember;
             InitializeComponent();
         }
 
@@ -368,8 +371,16 @@ namespace 電池篩選器
             }
 
             byte[] dataByte1 = ExportToExcel(battery4100list, battery5600list, battery8500list);
-            File.WriteAllBytes($@"{textBox3.Text}\電池整理-{datetime:yyyyMMddHHmmss}.xlsx", dataByte1);
-            MessageBox.Show($"檔案匯出完成 \r\n 路徑: {textBox3.Text}\\電池整理-{datetime:yyyyMMddHHmmss}.xlsx");
+            if (_isPaidMember)
+            {
+                //付費會員才能下載
+                File.WriteAllBytes($@"{textBox3.Text}\電池整理-{datetime:yyyyMMddHHmmss}.xlsx", dataByte1);
+                MessageBox.Show($"檔案匯出完成 \r\n 路徑: {textBox3.Text}\\電池整理-{datetime:yyyyMMddHHmmss}.xlsx");
+            }
+            else
+            {
+                MessageBox.Show($"因一般會員無法下載檔案，請聯繫管理員 或是 創造者");
+            }
         }
 
         private List<BatteryScore> GetMatchDetails(string type, int groupSize, int AllgroupSize, double ToleranceValue)
